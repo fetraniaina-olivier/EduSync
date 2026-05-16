@@ -1,3 +1,4 @@
+
 # ️ Système de synchronisation de données entre institutions
 
 Plateforme sécurisée de centralisation et de synchronisation des données scolaires entre les établissements et le Ministère de l'Enseignement.  
@@ -90,3 +91,5 @@ Confirmation : Mise à jour is_synced = true côté école + affichage instantan
 ✅ Hashage des secrets/mots de passe (bcrypt)
 ✅ Aucun fichier sensible dans le dépôt Git
 ✅ Logs structurés pour audit et debugging
+=======
+
