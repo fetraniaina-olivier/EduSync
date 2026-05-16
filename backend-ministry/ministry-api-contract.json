@@ -1,0 +1,432 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Ministry Sync API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/sync/health": {
+      "get": {
+        "tags": [
+          "Synchronization"
+        ],
+        "summary": "Health Check",
+        "description": "Endpoint de santé pour le monitoring.",
+        "operationId": "health_check_api_v1_sync_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sync/push": {
+      "post": {
+        "tags": [
+          "Synchronization"
+        ],
+        "summary": "Push School Data",
+        "description": "Reçoit les données de synchronisation depuis une école.",
+        "operationId": "push_school_data_api_v1_sync_push_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncPushRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "ok"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "default": "ministry-backend"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "1.0.0"
+          }
+        },
+        "type": "object",
+        "title": "HealthResponse",
+        "description": "Réponse pour l'endpoint de santé"
+      },
+      "SyncConflictDTO": {
+        "properties": {
+          "conflict_id": {
+            "type": "string",
+            "title": "Conflict Id",
+            "description": "ID unique du conflit"
+          },
+          "operation_id": {
+            "type": "string",
+            "title": "Operation Id",
+            "description": "ID de l'opération qui a causé le conflit"
+          },
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type",
+            "description": "Type d'entité concernée"
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "ID de l'entité concernée"
+          },
+          "school_value": {
+            "type": "object",
+            "title": "School Value",
+            "description": "Valeur proposée par l'école"
+          },
+          "ministry_value": {
+            "type": "object",
+            "title": "Ministry Value",
+            "description": "Valeur actuelle au ministère"
+          },
+          "detected_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Detected At",
+            "description": "Date de détection"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncStatus",
+            "description": "Statut du conflit",
+            "default": "conflict"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conflict_id",
+          "operation_id",
+          "entity_type",
+          "entity_id",
+          "school_value",
+          "ministry_value"
+        ],
+        "title": "SyncConflictDTO",
+        "description": "Représente un conflit détecté entre les données école et ministère"
+      },
+      "SyncEntityType": {
+        "type": "string",
+        "enum": [
+          "student",
+          "teacher",
+          "attendance",
+          "grade"
+        ],
+        "title": "SyncEntityType",
+        "description": "Types d'entités synchronisables"
+      },
+      "SyncOperationDTO": {
+        "properties": {
+          "op_id": {
+            "type": "string",
+            "title": "Op Id",
+            "description": "ID unique de l'opération (généré par l'école)"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SyncOperationType",
+            "description": "Type d'opération: create/update/delete"
+          },
+          "entity": {
+            "$ref": "#/components/schemas/SyncEntityType",
+            "description": "Type d'entité: student/teacher/etc."
+          },
+          "entity_id": {
+            "type": "string",
+            "title": "Entity Id",
+            "description": "ID de l'entité cible"
+          },
+          "payload": {
+            "type": "object",
+            "title": "Payload",
+            "description": "Données complètes de l'entité"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp",
+            "description": "Horodatage de l'opération"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op_id",
+          "type",
+          "entity",
+          "entity_id",
+          "payload"
+        ],
+        "title": "SyncOperationDTO",
+        "description": "Représente une opération individuelle envoyée par une école.",
+        "example": {
+          "entity": "student",
+          "entity_id": "student-uuid-456",
+          "op_id": "op-uuid-123",
+          "payload": {
+            "enrollment_date": "2024-09-01",
+            "grade": "5ème",
+            "name": "Jean Dupont"
+          },
+          "timestamp": "2024-04-20T10:30:00Z",
+          "type": "create"
+        }
+      },
+      "SyncOperationType": {
+        "type": "string",
+        "enum": [
+          "create",
+          "update",
+          "delete"
+        ],
+        "title": "SyncOperationType",
+        "description": "Types d'opérations de sync"
+      },
+      "SyncPushRequest": {
+        "properties": {
+          "school_id": {
+            "type": "string",
+            "title": "School Id",
+            "description": "ID unique de l'école (UUID)"
+          },
+          "school_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "School Code",
+            "description": "Code métier de l'école (ex: ECO-001)"
+          },
+          "client_version": {
+            "type": "string",
+            "title": "Client Version",
+            "description": "Version/dernière sync connue par le client (ISO datetime)"
+          },
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/SyncOperationDTO"
+            },
+            "type": "array",
+            "maxItems": 1000,
+            "minItems": 1,
+            "title": "Operations",
+            "description": "Liste des opérations à appliquer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "school_id",
+          "client_version",
+          "operations"
+        ],
+        "title": "SyncPushRequest",
+        "description": "Payload complet envoyé par une école via POST /sync/push",
+        "example": {
+          "client_version": "2024-04-20T09:00:00Z",
+          "operations": [
+            {
+              "entity": "student",
+              "entity_id": "student-uuid-abc",
+              "op_id": "op-uuid-1",
+              "payload": {
+                "grade": "Terminale",
+                "name": "Marie Curie"
+              },
+              "timestamp": "2024-04-20T10:00:00Z",
+              "type": "create"
+            }
+          ],
+          "school_code": "ECO-PARIS-01",
+          "school_id": "school-uuid-789"
+        }
+      },
+      "SyncResponse": {
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "title": "Accepted",
+            "description": "Nombre d'opérations acceptées"
+          },
+          "rejected": {
+            "type": "integer",
+            "title": "Rejected",
+            "description": "Nombre d'opérations rejetées"
+          },
+          "conflicts": {
+            "items": {
+              "$ref": "#/components/schemas/SyncConflictDTO"
+            },
+            "type": "array",
+            "title": "Conflicts",
+            "description": "Liste des conflits détectés"
+          },
+          "server_version": {
+            "type": "string",
+            "title": "Server Version",
+            "description": "Nouvelle version serveur (à utiliser pour le prochain pull)"
+          },
+          "next_sync_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Sync Url",
+            "description": "URL pour récupérer les mises à jour"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accepted",
+          "rejected",
+          "server_version"
+        ],
+        "title": "SyncResponse",
+        "description": "Réponse standard après traitement d'un push/pull",
+        "example": {
+          "accepted": 45,
+          "conflicts": [],
+          "next_sync_url": "/api/v1/sync/pull?since=2024-04-20T10:35:00Z",
+          "rejected": 2,
+          "server_version": "2024-04-20T10:35:00Z"
+        }
+      },
+      "SyncStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "processed",
+          "conflict",
+          "failed"
+        ],
+        "title": "SyncStatus",
+        "description": "Statuts de traitement d'une opération"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

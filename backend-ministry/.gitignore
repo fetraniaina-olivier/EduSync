@@ -1,0 +1,41 @@
+# Environnement virtuel Python
+venv/
+.venv/
+env/
+
+# Fichiers de compilation Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE / Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environnement & secrets
+.env
+*.env.local
+!.env.example
+
+# Logs & données temporaires
+*.log
+tmp/
+temp/
+
+# Base de données locale (si utilisée en dev)
+*.db
+*.sqlite3
+
+# Docker compose override (personnel)
+docker-compose.override.yml
+
+# Documentation générée
+site/
+htmlcov/
+
+# Credentials AWS / Cloud (si jamais)
+*.pem
+*.key

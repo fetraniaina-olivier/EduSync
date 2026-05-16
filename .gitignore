@@ -1,0 +1,43 @@
+#  Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+#  Node.js / React
+node_modules/
+.npm
+dist/
+build/
+.vite/
+*.log
+package-lock.json
+
+#  Fichiers sensibles
+.env
+*.env
+.env.local
+.env.production
+
+#  Bases de données locales
+*.db
+*.sqlite
+*.sqlite3
+school.db
+ministry.db
+
+# ️ OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+#  Docker (optionnel)
+.dockerenv
